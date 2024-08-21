@@ -108,7 +108,8 @@ const LoginLayout = (props) => {
                 setIsLoading(false);
                 if (res.status === 201) {
                     setIsLoading(false);
-                    navigate("/my_contacts");
+                    push("/my_contacts");
+                    // navigate("/my_contacts");
                     res.json().then((json) => {
                         localStorage.setItem("token", json.user.accessToken);
                         setIsLoading(false);

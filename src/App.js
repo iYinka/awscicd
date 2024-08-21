@@ -6,7 +6,7 @@ import ContactsTable from "./container/contacts-table";
 import SettingsHeader from "./container/header/header";
 import LoginLayout from "./container/login";
 import { endpoints } from "./service";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import SignUp from "./container/sign-up";
 
 function App() {
@@ -31,7 +31,7 @@ function App() {
         <>
             <Router data-testid="App">
                 <Routes>
-                    <Route exact path="/" element={<LoginLayout />} />
+                    <Route path="/" element={<LoginLayout />} />
                     <Route exact path="/register" element={<SignUp />} />
                     <Route
                         exact

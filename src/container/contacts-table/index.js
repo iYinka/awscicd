@@ -435,7 +435,7 @@ const ContactsTable = ({ props }) => {
                 <table className={styles.table}>
                     <thead>
                         <tr>
-                            <th> S/N</th>
+                            <th>S/N</th>
                             <th>NAME</th>
                             <th>PHONE NUMBER</th>
                             <th>EMAIL</th>
