@@ -1,0 +1,37 @@
+version: 0.2.0
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 14
+    commands:
+      - npm install
+
+  pre-build:
+    commands:
+      - echo "Running lint..."
+      - eslint .
+
+  build:
+    commands:
+      - echo "Running unit tests..."
+      - npm run test
+      - if [ $? -ne 0 ]; then exit 1; fi
+
+   post-build:
+    commands:
+      - echo "Running code coverage..."
+      - npm run coverage
+      - if [ $(coverage report --clover) -lt 80 ]; then exit 1; fi
+
+artifacts:
+  files:
+    - coverage/lcov.info
+
+reports:
+  coverage:
+    files:
+      - coverage/lcov.info
+    base-directory: coverage
+
+
