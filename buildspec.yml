@@ -16,7 +16,7 @@ phases:
       - echo Running Unit Tests...
       - npm run test --if-present
       - echo Running Unit Coverage
-      - npx nyc npm test # Run tests with NYC for coverage
+      - npm run coverage # Run tests with NYC for coverage
       - echo "Checking coverage threshold..."
       - npx nyc check-coverage --branches 80 --functions 80 --lines 80 --statements 80 # Enforce 80% coverage
 
