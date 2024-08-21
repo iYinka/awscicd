@@ -14,7 +14,7 @@ phases:
   build:
     commands:
       - echo Running Unit Tests...
-      - npm test -- --coverage # Running tests with coverage
+      - npm run coverage # Running tests with coverage
       - echo "Checking Code Coverage..."
       - COVERAGE=$(grep -o '^[0-9]\+\.[0-9]\+' coverage/summary.txt | tail -n1)
       - if (( $(echo "$COVERAGE < 80.0" | bc -l) )); then echo "Code coverage below 80%"; exit 1; fi
