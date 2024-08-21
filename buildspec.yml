@@ -1,37 +1,35 @@
-version: 0.2.0
+version: 0.2
 
 phases:
   install:
-    runtime-versions:
-      nodejs: 14
     commands:
+      - echo Installing dependencies...
       - npm install
 
-  pre-build:
+  pre_build:
     commands:
-      - echo "Running lint..."
-      - eslint .
+      - echo Running Linting...
+      - npm run lint  # Linting the source code
 
   build:
     commands:
-      - echo "Running unit tests..."
-      - npm run test
-      - if [ $? -ne 0 ]; then exit 1; fi
+      - echo Running Unit Tests...
+      - npm test -- --coverage # Running tests with coverage
+      - echo "Checking Code Coverage..."
+      - COVERAGE=$(grep -o '^[0-9]\+\.[0-9]\+' coverage/summary.txt | tail -n1)
+      - if (( $(echo "$COVERAGE < 80.0" | bc -l) )); then echo "Code coverage below 80%"; exit 1; fi
+      - echo "Code coverage is $COVERAGE%."
+      - echo Building the project...
+      - npm run build  # Building the React project
 
-   post-build:
+  post_build:
     commands:
-      - echo "Running code coverage..."
-      - npm run coverage
-      - if [ $(coverage report --clover) -lt 80 ]; then exit 1; fi
+      - echo Build completed on `date`
+      - echo "Deploying to S3..."
+      - aws s3 sync build/ s3://test-image-bkt/ --delete
+      - echo Deployment to S3 completed.
 
 artifacts:
   files:
-    - coverage/lcov.info
-
-reports:
-  coverage:
-    files:
-      - coverage/lcov.info
-    base-directory: coverage
-
-
+    - '**/*'
+  base-directory: build
