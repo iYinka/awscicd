@@ -1,37 +1,37 @@
-version: 0.2
+# version: 0.2
 
-phases:
-  install:
-    commands:
-      - echo Installing dependencies...
-      - npm install
+# phases:
+#   install:
+#     commands:
+#       - echo Installing dependencies...
+#       - npm install
 
-  pre_build:
-    commands:
-      - echo Running Linting...
-      - npm run lint  # Linting the source code
-      - echo Running Unit Tests...
-      - npm run test --if-present
-
-
-  build:
-    commands:
-
-      - echo Building the project...
-      - npm run build  # Building the React project
-
-  post_build:
-    commands:
-      - echo Build completed on `date`
-      - echo "Deploying to S3..."
-      - aws s3 sync build/ s3://test-image-bkt/ --delete
-      - echo Deployment to S3 completed.
-      - echo Uploading Coverage to s3
-      - aws s3 cp ./coverage/lcov-report s3://test-image-bkt/coverage/ --recursive
+#   pre_build:
+#     commands:
+#       - echo Running Linting...
+#       - npm run lint  # Linting the source code
+#       - echo Running Unit Tests...
+#       - npm run test --if-present
 
 
-artifacts:
-  files:
-    - build/**/* # Includes the build directory in artifacts
-    - coverage/**/*
-  discard-paths: yes
+#   build:
+#     commands:
+
+#       - echo Building the project...
+#       - npm run build  # Building the React project
+
+#   post_build:
+#     commands:
+#       - echo Build completed on `date`
+#       - echo "Deploying to S3..."
+#       - aws s3 sync build/ s3://test-image-bkt/ --delete
+#       - echo Deployment to S3 completed.
+#       - echo Uploading Coverage to s3
+#       - aws s3 cp ./coverage/lcov-report s3://test-image-bkt/coverage/ --recursive
+
+
+# artifacts:
+#   files:
+#     - build/**/* # Includes the build directory in artifacts
+#     - coverage/**/*
+#   discard-paths: yes
