@@ -20,8 +20,8 @@ phases:
     commands:
       - echo Running unit tests with coverage...
       - npm run test -- --coverage --coverageReporters=text-summary --watchAll=false
-      - COVERAGE=$(npx nyc report --reporter=text-summary | grep -Po 'All files.*?\K\d+(?=%)')
-      - echo "Coverage is $COVERAGE%"
+      # - COVERAGE=$(npx nyc report --reporter=text-summary | grep -Po 'All files.*?\K\d+(?=%)')
+      # - echo "Coverage is $COVERAGE%"
       # - |
       #   if (( $(echo "$COVERAGE < $COVERAGE_THRESHOLD" | bc -l) )); then
       #     echo "Coverage is less than $COVERAGE_THRESHOLD%, failing the build...";
