@@ -22,7 +22,7 @@ phases:
     commands:
       - echo Running Unit Tests...
       - npm run test --if-present
-           - npm run coverage > coverage.log
+      - npm run coverage > coverage.log
       - COVERAGE=$(grep -oP 'Coverage:\s+\K\d+' coverage.log)
       - echo "Coverage is $COVERAGE%"
       # - echo Building the project...
