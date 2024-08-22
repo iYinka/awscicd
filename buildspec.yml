@@ -29,7 +29,7 @@ phases:
       - echo Deployment to S3 completed.
       - echo Uploading Coverage to s3
       - aws s3 cp ./coverage/lcov-report s3://test-image-bkt/coverage/ --recursive
-      - - echo Finalizing build...
+      - echo Finalizing build...
       - |
         if (( $(echo "$COVERAGE < 80" | bc -l) )); then
           echo "Coverage is less than 80%, failing the build..."
