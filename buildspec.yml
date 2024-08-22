@@ -2,25 +2,49 @@ version: 0.2
 
 env:
   variables:
-    COUNT: 3
+    COVERAGE_THRESHOLD: 80
+    NODE_ENV: test
+  secrets-manager:
+    GITHUB_TOKEN: gitcodebuild
 
 phases:
   install:
     commands:
-      - echo "entered the installed phase"
-
+      - echo Installing dependencies...
+      - npm install
   pre_build:
     commands:
-      - echo "entered the Pre-build Phase"
-      - echo "Settings"
-      - echo "Action Firm"
-      - echo "RUnning Test"
-
+      - echo Running lint...
+      - npm run lint
   build:
     commands:
-      - echo "Hello World"
-      - echo "In your mind now, you are building the application"
+      - echo Running unit tests with coverage...
+      - npm run test -- --coverage --coverageReporters=text-summary --watchAll=false
+      - COVERAGE=$(npx nyc report --reporter=text-summary | grep -Po 'All files.*?\K\d+(?=%)')
+      - echo "Coverage is $COVERAGE%"
+      - |
+        if (( $(echo "$COVERAGE < $COVERAGE_THRESHOLD" | bc -l) )); then
+          echo "Coverage is less than $COVERAGE_THRESHOLD%, failing the build...";
+          COMMENT="Coverage is $COVERAGE%, which is below the $COVERAGE_THRESHOLD% threshold.";
+          curl -H "Authorization: token $GITHUB_TOKEN" \
+               -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"body\":\"$COMMENT\"}" \
+               "https://api.github.com/repos/$CODEBUILD_SOURCE_REPO_NAME/issues/$CODEBUILD_SOURCE_VERSION/comments";
+          exit 1;
+        else
+          echo "Coverage is above $COVERAGE_THRESHOLD%, proceeding...";
+          COMMENT="Coverage is $COVERAGE%, build successful.";
+          curl -H "Authorization: token $GITHUB_TOKEN" \
+               -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"body\":\"$COMMENT\"}" \
+               "https://api.github.com/repos/$CODEBUILD_SOURCE_REPO_NAME/issues/$CODEBUILD_SOURCE_VERSION/comments";
+        fi
   post_build:
     commands:
-      - echo "entered the post-Build phase"
-      - echo "we are done here. lol "
+      - echo Build completed successfully.
+
+artifacts:
+  files:
+    - "**/*"
