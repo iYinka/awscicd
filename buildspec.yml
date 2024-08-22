@@ -1,13 +1,6 @@
 version: 0.2
 
 
-env:
-  variables:
-      GITHUB_TOKEN: "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"  # Replace with your GitHub token
-      GITHUB_REPO_NAME: "awscicd"      # Replace with your repository name
-      GITHUB_OWNER: "iyinka"    # Replace with your GitHub username or organization
-      # GIT_COMMIT_ID: "your-commit-id"
-
 
 phases:
   install:
