@@ -13,9 +13,18 @@ phases:
       # - echo Running Unit Tests...
       # - npm run test --if-present
       - echo Checking code coverage...
-      - npm run coverage # Assuming this script generates the coverage report
-      - COVERAGE=$(nyc report --reporter=lcov | grep -oP 'Coverage\s+\K[0-9]+(\.[0-9]+)?')
-      - echo Coverage is $COVERAGE%
+           - echo Running tests and generating coverage...
+      - npm run coverage > coverage-output.txt
+      - cat coverage-output.txt
+      - COVERAGE=$(grep -o '[0-9]*\.[0-9]*%' coverage-output.txt | head -1)
+      - echo "Coverage Percentage is $COVERAGE"
+      - |
+        if [ $(echo "$COVERAGE < 80.0" | bc) -eq 1 ]; then
+          echo "Coverage is below 80%. Failing the build."
+          exit 1
+        else
+          echo "Coverage is acceptable."
+        fi
   build:
     commands:
       - echo Building the project...
