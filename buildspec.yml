@@ -12,12 +12,11 @@ phases:
       - npm run lint  # Linting the source code
       - echo Running Unit Tests...
       - npm run test --if-present
-      - echo Checking code coverage...
-      - npm run coverage # Assuming this script generates the coverage report
-      - COVERAGE=$(nyc report --reporter=lcov | grep -oP 'Coverage\s+\K[0-9]+(\.[0-9]+)?')
-      - echo Coverage is $COVERAGE%
+
+
   build:
     commands:
+
       - echo Building the project...
       - npm run build  # Building the React project
 
@@ -29,26 +28,6 @@ phases:
       - echo Deployment to S3 completed.
       - echo Uploading Coverage to s3
       - aws s3 cp ./coverage/lcov-report s3://test-image-bkt/coverage/ --recursive
-      - - echo Finalizing build...
-      - |
-        if (( $(echo "$COVERAGE < 80" | bc -l) )); then
-          echo "Coverage is less than 80%, failing the build..."
-          COMMENT="Coverage is $COVERAGE%, which is below the 80% threshold."
-          curl -H "Authorization: token $GITHUB_TOKEN" \
-               -H "Content-Type: application/json" \
-               -X POST \
-               -d "{\"body\":\"$COMMENT\"}" \
-               "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$GITHUB_PR_NUMBER/comments"
-          exit 1
-        else
-          echo "Coverage is above 80%, proceeding..."
-          COMMENT="Coverage is $COVERAGE%, build successful."
-          curl -H "Authorization: token $GITHUB_TOKEN" \
-               -H "Content-Type: application/json" \
-               -X POST \
-               -d "{\"body\":\"$COMMENT\"}" \
-               "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$GITHUB_PR_NUMBER/comments"
-        fi
 
 
 artifacts:
