@@ -1,35 +1,61 @@
 version: 0.2
 
+
+env:
+  variables:
+      GITHUB_TOKEN: "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"  # Replace with your GitHub token
+      GITHUB_REPO_NAME: "awscicd"      # Replace with your repository name
+      GITHUB_OWNER: "iyinka"    # Replace with your GitHub username or organization
+      # GIT_COMMIT_ID: "your-commit-id"
+
+
 phases:
   install:
     commands:
       - echo Installing dependencies...
       - npm install
+      - npm install -g nyc
 
   pre_build:
     commands:
       - echo Running Linting...
       - npm run lint  # Linting the source code
+      - echo "Extracting PR number from commit message..."
+      - PR_NUMBER=$(git log -1 --pretty=%B | grep -oP '(?<=#)\d+')
+      - echo "PR Number is $PR_NUMBER"
+
 
   build:
     commands:
       - echo Running Unit Tests...
       - npm run test --if-present
-      - echo Running Unit Coverage
-      - npm run coverage # Run tests with NYC for coverage
-      - echo "Checking coverage threshold..."
-      - npx nyc check-coverage --branches 80 --functions 80 --lines 80 --statements 80 # Enforce 80% coverage
-
-      # - npm run coverage # Running tests with coverage
-      # - echo "Checking Code Coverage..."
-      # - COVERAGE=$(grep -o '^[0-9]\+\.[0-9]\+' coverage/summary.txt | tail -n1)
-      # - if (( $(echo "$COVERAGE < 80.0" | bc -l) )); then echo "Code coverage below 80%"; exit 1; fi
-      # - echo "Code coverage is $COVERAGE%."
-      - echo Building the project...
-      - npm run build  # Building the React project
+           - npm run coverage > coverage.log
+      - COVERAGE=$(grep -oP 'Coverage:\s+\K\d+' coverage.log)
+      - echo "Coverage is $COVERAGE%"
+      # - echo Building the project...
+      # - npm run build  # Building the React project
 
   post_build:
     commands:
+      - |
+        if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+          echo "Coverage is less than 80%, failing the build..."
+          COMMENT="Coverage is $COVERAGE%, which is below the 80% threshold. Build failed."
+          curl -H "Authorization: token $GITHUB_TOKEN" \
+               -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"body\":\"$COMMENT\"}" \
+               "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$GITHUB_PR_NUMBER/comments"
+          exit 1
+        else
+          echo "Coverage is above 80%, proceeding..."
+          COMMENT="Coverage is $COVERAGE%, build successful."
+          curl -H "Authorization: token $GITHUB_TOKEN" \
+               -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"body\":\"$COMMENT\"}" \
+               "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$GITHUB_PR_NUMBER/comments"
+        fi
       - echo Build completed on `date`
       - echo "Deploying to S3..."
       - aws s3 sync build/ s3://test-image-bkt/ --delete
@@ -40,6 +66,7 @@ phases:
 
 artifacts:
   files:
-    - build/**/* # Includes the build directory in artifacts
-    - coverage/**/*
+      - coverage.log
+    # - build/**/* # Includes the build directory in artifacts
+    # - coverage/**/*
   discard-paths: yes
