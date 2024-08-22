@@ -1,0 +1,67 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo Installing dependencies...
+      - npm install
+
+  pre_build:
+    commands:
+      - echo Running Linting...
+      - npm run lint  # Linting the source code
+      # - echo Running Unit Tests...
+      # - npm run test --if-present
+      - echo Checking code coverage...
+      - echo Running tests and generating coverage...
+      - npm run coverage > coverage-output.txt
+      - cat coverage-output.txt
+      - COVERAGE=$(grep -o '[0-9]*\.[0-9]*%' coverage-output.txt | head -1)
+      - echo "Coverage Percentage is $COVERAGE"
+      - |
+        if [ $(echo "$COVERAGE < 80.0" | bc) -eq 1 ]; then
+          echo "Coverage is below 80%. Failing the build."
+          exit 1
+        else
+          echo "Coverage is acceptable."
+        fi
+  build:
+    commands:
+      - echo Building the project...
+      - npm run build  # Building the React project
+
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo "Deploying to S3..."
+      - aws s3 sync build/ s3://test-image-bkt/ --delete
+      - echo Deployment to S3 completed.
+      - echo Uploading Coverage to s3
+      - aws s3 cp ./coverage/lcov-report s3://test-image-bkt/coverage/ --recursive
+      - echo Finalizing build...
+      - |
+        if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+          echo "Coverage is less than 80%, failing the build..."
+          COMMENT="Coverage is $COVERAGE%, which is below the 80% threshold."
+          curl -H "Authorization: token $GITHUB_TOKEN" \
+               -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"body\":\"$COMMENT\"}" \
+               "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$GITHUB_PR_NUMBER/comments"
+          exit 1
+        else
+          echo "Coverage is above 80%, proceeding..."
+          COMMENT="Coverage is $COVERAGE%, build successful."
+          curl -H "Authorization: token $GITHUB_TOKEN" \
+               -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"body\":\"$COMMENT\"}" \
+               "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$GITHUB_PR_NUMBER/comments"
+        fi
+
+
+artifacts:
+  files:
+    - build/**/* # Includes the build directory in artifacts
+    - coverage/**/*
+  discard-paths: yes
