@@ -11,6 +11,7 @@ phases:
   install:
     commands:
       - echo Installing dependencies...
+      - npm install -g serve
       - npm install
   pre_build:
     commands:

@@ -1,1 +1,1 @@
-web: node ./src/App.js
+web: serve -s build -l 8080
