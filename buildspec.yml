@@ -15,7 +15,8 @@ phases:
   pre_build:
     commands:
       - echo Running lint...
-      - npm run lint
+      - ./node_modules/.bin/eslint .
+
   build:
     commands:
       - echo Running unit tests with coverage...
