@@ -2,7 +2,6 @@
     "name": "client",
     "version": "0.1.0",
     "private": true,
-    "proxy": "https://kind-gold-cow-hem.cyclic.app",
     "dependencies": {
         "@babel/cli": "^7.24.7",
         "@babel/core": "^7.24.7",
