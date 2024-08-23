@@ -12,22 +12,17 @@ phases:
     commands:
       - echo Installing dependencies...
       - npm install
-      - curl -fsSL https://get.docker.com -o get-docker.sh
-      - sh get-docker.sh
-      - sudo usermod -aG docker $USER
-      - newgrp docker
   pre_build:
     commands:
       - echo Running lint...
-      - docker run --rm -e RUN_LOCAL=true -v $(pwd):/tmp/lint github/super-linter
-      # - ./node_modules/.bin/eslint .
+      - ./node_modules/.bin/eslint .
 
   build:
     commands:
       - echo Running unit tests with coverage...
       - npm run test -- --coverage --coverageReporters=text-summary --watchAll=false
-      # - COVERAGE=$(npx nyc report --reporter=text-summary | grep -Po 'All files.*?\K\d+(?=%)')
-      # - echo "Coverage is $COVERAGE%"
+      - COVERAGE=$(npx nyc report --reporter=text-summary | grep -Po 'All files.*?\K\d+(?=%)')
+      - echo "Coverage is $COVERAGE%"
       # - |
       #   if (( $(echo "$COVERAGE < $COVERAGE_THRESHOLD" | bc -l) )); then
       #     echo "Coverage is less than $COVERAGE_THRESHOLD%, failing the build...";
