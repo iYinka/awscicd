@@ -12,10 +12,15 @@ phases:
     commands:
       - echo Installing dependencies...
       - npm install
+      - curl -fsSL https://get.docker.com -o get-docker.sh
+      - sh get-docker.sh
+      - sudo usermod -aG docker $USER
+      - newgrp docker
   pre_build:
     commands:
       - echo Running lint...
-      - ./node_modules/.bin/eslint .
+      - docker run --rm -e RUN_LOCAL=true -v $(pwd):/tmp/lint github/super-linter
+      # - ./node_modules/.bin/eslint .
 
   build:
     commands:
