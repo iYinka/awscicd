@@ -43,6 +43,7 @@ phases:
       #          -d "{\"body\":\"$COMMENT\"}" \
       #          "https://api.github.com/repos/$CODEBUILD_SOURCE_REPO_NAME/issues/$CODEBUILD_SOURCE_VERSION/comments";
       #   fi
+      - npm run build
   post_build:
     commands:
       - echo Build completed successfully.
@@ -50,3 +51,4 @@ phases:
 artifacts:
   files:
     - "**/*"
+  base-directory: build
