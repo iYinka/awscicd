@@ -19,7 +19,7 @@ phases:
 
   build:
     commands:
-      - echo Running unit tests with coverage...
+      - echo Running unit tests with coverage........
       - npm run test -- --coverage --coverageReporters=text-summary --watchAll=false
       # - COVERAGE=$(npx nyc report --reporter=text-summary | grep -Po 'All files.*?\K\d+(?=%)')
       # - echo "Coverage is $COVERAGE%"
