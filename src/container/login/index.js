@@ -2,14 +2,11 @@ import React, { useState } from "react";
 import styles from "./styles/Login.module.css";
 import { Input, Row, Col, Alert, notification, Spin } from "antd";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
-import * as EmailValidator from "email-validator";
 import { Link, useNavigate } from "react-router-dom";
 // import { LoginVendor } from "../../store/actions/authAction";
 // import { ButtonLoader } from "../../components/buttons";
 // import Spinner from "../../components/spinner";
 import { LoadingOutlined } from "@ant-design/icons";
-import { endpoints } from "../../service";
-import validator from "validator";
 
 const LoginLayout = (props) => {
     const navigate = useNavigate();
@@ -47,119 +44,6 @@ const LoginLayout = (props) => {
         });
     };
 
-    const validatePassword = (value) => {
-        if (
-            validator.isStrongPassword(values.password, {
-                minLength: 8,
-                // minLowercase: 1,
-                // minUppercase: 1,
-                // minNumbers: 1,
-                // minSymbols: 1,
-            })
-        ) {
-            setMsg("Password not strong...");
-        }
-    };
-
-    const ValidateUser = () => {
-        if (!values.email || values.email === "") {
-            setIsOpen(true);
-            setNotify({
-                type: "error",
-                message: "Submit a valid Email address",
-            });
-            return;
-        }
-        if (!EmailValidator.validate(values.email)) {
-            setIsOpen(true);
-            setNotify({
-                type: "error",
-                message: "Submit a valid Email address",
-            });
-            return;
-        }
-        if (!values.password) {
-            setIsOpen(true);
-            setNotify({
-                type: "error",
-                message: "Password is incorrect",
-            });
-            return;
-        }
-
-        SignInUser();
-    };
-
-    const SignInUser = async () => {
-        setIsLoading(true);
-        const userData = { email: values.email, password: values.password };
-
-        try {
-            const res = await fetch(`${endpoints.signInUser}`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-type": "application/json; charset=UTF-8",
-                },
-                body: JSON.stringify(userData),
-                mode: "cors",
-                credentials: "same-origin",
-            }).then((res) => {
-                setIsLoading(false);
-                if (res.status === 201) {
-                    setIsLoading(false);
-                    push("/my_contacts");
-                    // navigate("/my_contacts");
-                    res.json().then((json) => {
-                        localStorage.setItem("token", json.user.accessToken);
-                        setIsLoading(false);
-                        openNotification({
-                            type: "success",
-                            title: "Sign In",
-                            description: json.message,
-                            placement: "topLeft",
-                        });
-                    });
-                    window.location.reload(false);
-                } else if (res.status === 401) {
-                    navigate("/");
-                    res.json().then((json) => {
-                        console.log(json.message);
-                        setIsLoading(false);
-                        openNotification({
-                            type: "error",
-                            title: json.status,
-                            description: json.message,
-                            placement: "bottomRight",
-                        });
-                    });
-                } else if (res.status === 404) {
-                    navigate("/");
-                    res.json().then((json) => {
-                        console.log(json.message);
-                        setIsLoading(true);
-                        openNotification({
-                            type: "error",
-                            title: json.status,
-                            description: json.message,
-                            placement: "bottomRight",
-                        });
-                    });
-                }
-            });
-        } catch (err) {
-            console.log();
-        }
-    };
-
-    setTimeout(() => {
-        setIsLoading(false);
-        setIsOpen(false);
-    }, 3000);
-
-    const googleAuth = () => {
-        window.open(`http://localhost:8080/auth/google/callback`, "self");
-    };
     return (
         <div className={styles.bck}>
             <div className={styles.alert}>
@@ -215,7 +99,7 @@ const LoginLayout = (props) => {
                                 required
                                 value={values.password}
                                 onChange={(e) => {
-                                    validatePassword(e.target.value);
+                                    // validatePassword(e.target.value);
                                     setValues({
                                         ...values,
                                         password: e.target.value,
