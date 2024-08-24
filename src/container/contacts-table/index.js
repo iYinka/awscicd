@@ -21,7 +21,6 @@ import {
 } from "react-icons/md";
 // import NumberFormat from "react-number-format";
 import moment from "moment";
-import { endpoints } from "../../service";
 
 // import { capitalize } from "../../../../utils";
 import Modal from "./../../components/Modal";
@@ -46,131 +45,6 @@ const ContactsTable = ({ props }) => {
         c_desc: "",
         c_isActive: Boolean,
     });
-
-    const onChange = (value) => {
-        console.log(`selected ${value}`);
-    };
-
-    useEffect(() => {
-        fetchAllContacts();
-    }, []);
-
-    const fetchAllContacts = async () => {
-        setIsLoading(true);
-        try {
-            let res = await fetch(`${endpoints.getAllContacts}`, {
-                method: "GET",
-                headers: {
-                    Accept: "application/json",
-                    Authorization: `Bearer ${Token}`,
-                },
-            }).then((res) => {
-                setIsLoading(false);
-                if (res.ok) {
-                    res.json().then((json) => {
-                        setContacts(json);
-                        message.success("Found saved contacts");
-                    });
-                }
-            });
-        } catch (err) {
-            message.error("No contact found");
-            setIsLoading(false);
-        }
-    };
-
-    // DELETE CONTACT
-    const DeleteContact = async () => {
-        setIsLoading(true);
-        try {
-            const res = await fetch(
-                `${endpoints.deleteContact}/${singleContact.id}`,
-                {
-                    method: "DELETE",
-                    headers: {
-                        Accept: "application/json",
-                        Authorization: `Bearer ${Token}`,
-                    },
-                }
-            ).then((res) => {
-                if (res.status !== 201) {
-                    return;
-                } else {
-                    setContacts(
-                        contacts.filter((contact) => {
-                            return contact.id !== singleContact?.id;
-                        })
-                    );
-                    message.success(
-                        `${singleContact.name} successfully deleted`
-                    );
-                    setIsLoading(false);
-                    fetchAllContacts();
-                }
-            });
-        } catch (err) {
-            message.error(
-                `Couldn't delete contact with name: ${singleContact.name}`
-            );
-            setIsLoading(false);
-        }
-    };
-    //  DELETE CONTACT ENDS
-
-    // UPDATE CONTACT
-    const UpdateContact = async () => {
-        setIsLoading(true);
-        const contactDetails = {
-            name: values.c_name || singleContact.name,
-            email: values.c_email || singleContact.email,
-            phoneNumber: values.c_phone_no || singleContact.phoneNumber,
-            occupation: "Doc." || singleContact.occupation,
-            description: values.c_desc || singleContact.description,
-            isActive: values.c_isActive || singleContact.isActive,
-        };
-
-        try {
-            const res = await fetch(
-                `${endpoints.updateContact}/${singleContact.id}`,
-                {
-                    method: "PATCH",
-                    headers: {
-                        Accept: "application/json",
-                        "Content-type": "application/json; charset=UTF-8",
-                        Authorization: `Bearer ${Token}`,
-                    },
-                    body: JSON.stringify(contactDetails),
-                    mode: "cors",
-                    credentials: "same-origin",
-                }
-            ).then((res) => {
-                fetchAllContacts();
-                if (res.status !== 200) {
-                    return;
-                } else {
-                    setContacts(
-                        contacts.sort((contact) => {
-                            return contact.id === singleContact?.id;
-                        })
-                    );
-                }
-            });
-            setValues({
-                c_name: "",
-                c_email: "",
-                c_phone_no: "",
-                c_desc: "",
-            });
-            message.success(`Update successful`);
-            setIsLoading(false);
-        } catch (err) {
-            message.error(
-                `Couldn't update contact with name: ${singleContact.name}`
-            );
-            setIsLoading(false);
-        }
-    };
-    //  UPDATE CONTACT ENDS
 
     //  For PAGINATION
     // Get current posts
@@ -231,7 +105,6 @@ const ContactsTable = ({ props }) => {
                             : `${styles.activate}`
                     }
                     onClick={() => {
-                        DeleteContact();
                         setTimeout(() => {
                             handleClose();
                         }, 500);
@@ -411,7 +284,6 @@ const ContactsTable = ({ props }) => {
                 <Button
                     className="formBtn"
                     onClick={() => {
-                        UpdateContact();
                         setTimeout(() => {
                             handleClose();
                         }, 500);
@@ -444,90 +316,13 @@ const ContactsTable = ({ props }) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {isLoading === true && (
-                            <tr>
-                                <td colSpan="100%">
-                                    <div className={styles.loader}>
-                                        <Spin size="large" />
-                                    </div>
-                                </td>
-                            </tr>
-                        )}
-                        {isLoading === false && TableData.length === 0 && (
-                            <tr>
-                                <td colSpan="100%">
-                                    <div className={styles.loader}>
-                                        <p>No contact record found</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        )}
-                        {isLoading === false &&
-                            TableData.length !== 0 &&
-                            contactData.map((x, i) => (
-                                <tr key={x._id}>
-                                    <td style={{ textAlign: "right" }}>
-                                        {i + 1}
-                                    </td>
-                                    <td>{x.name}</td> <td>{x.phoneNumber}</td>
-                                    <td style={{ textTransform: "lowercase" }}>
-                                        {x.email}
-                                    </td>
-                                    <td>{x.description}</td>
-                                    {/* <th>{x.occupation}</th> */}
-                                    <td>
-                                        {moment(x.createdAt).format(
-                                            "Do MM YYYY, h:mm:ss a"
-                                        )}
-                                    </td>
-                                    {/* <td>
-                                            {moment(x.updatedAt).format(
-                                                "Do MM YYYY, h:mm:ss a"
-                                            )}
-                                        </td> */}
-                                    <td>
-                                        <div
-                                            className={
-                                                x.isActive === true
-                                                    ? `${styles.active}`
-                                                    : `${styles.inactive}`
-                                            }
-                                        >
-                                            {" "}
-                                            {x.isActive === true
-                                                ? "active"
-                                                : "inactive"}
-                                        </div>
-                                    </td>{" "}
-                                    <td>
-                                        <div className={styles.action}>
-                                            <MdDelete
-                                                className={styles.md_delete}
-                                                size={25}
-                                                onClick={() => {
-                                                    setSingleContact(x);
-                                                    setTimeout(() => {
-                                                        setShowModal(
-                                                            "delete contact"
-                                                        );
-                                                    }, 10);
-                                                }}
-                                            />
-                                            <Dropdown
-                                                overlay={menu(x)}
-                                                trigger={["click"]}
-                                                arrow
-                                            >
-                                                <Button
-                                                    className={styles.option}
-                                                >
-                                                    <BiDotsVerticalRounded />
-                                                </Button>
-                                            </Dropdown>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
+                        <tr>
+                            <td colSpan="100%">
+                                <div className={styles.loader}>
+                                    <p>No contact record found</p>
+                                </div>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>{" "}
                 {showModal === "delete contact" && deleteContactModal}
