@@ -1,5 +1,4 @@
 import ContactsTable from "./container/contacts-table";
-import LoginLayout from "./container/login";
 import { render, screen } from "@testing-library/react";
 
 test("renders table headers in correct order", () => {
